@@ -1,7 +1,28 @@
 package org.example;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingConstants;
+import java.awt.Dimension;
+import java.awt.Component;
+import java.awt.Color;
+import java.awt.CardLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -13,15 +34,17 @@ public class Main extends JFrame {
 
     private final JPanel mainPanel;
     private final CardLayout cardLayout;
-    private final java.util.List<Integer> numbers = new ArrayList<>();
-    private boolean isAscendingOrder = true;
-    private final Random random = new Random();
+    private final java.util.List<Integer> numbers;
+    private boolean isAscendingOrder;
+    private final Random random;
 
     public Main() {
         setTitle("Single Page Application");
         setSize(600, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        numbers = new ArrayList<>();
+        random = new Random();
 
         // CardLayout for screen switching
         cardLayout = new CardLayout();
@@ -67,12 +90,12 @@ public class Main extends JFrame {
             String inputText = numberInputField.getText();
             try {
                 int numberOfNumbers = Integer.parseInt(inputText);
-                if (numberOfNumbers > 0) {
+                if (numberOfNumbers > 0 && numberOfNumbers <= 1000) {
                     // Pass the number to the Sort screen and recreate it
                     mainPanel.add(createSortScreen(numberOfNumbers), TITLE_SORT);
                     cardLayout.show(mainPanel, TITLE_SORT);
                 } else {
-                    JOptionPane.showMessageDialog(panel, "Please enter a positive number.",
+                    JOptionPane.showMessageDialog(panel, "Please enter a number larger than 0 and lesser than 1000.",
                             "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException ex) {
