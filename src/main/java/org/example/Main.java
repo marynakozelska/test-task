@@ -31,12 +31,17 @@ public class Main extends JFrame {
     public static final String TITLE_INTRO = "Intro";
     public static final String TITLE_SORT = "Sort";
     public static final Dimension BUTTON_SIZE = new Dimension(100, 30);
+    private static final Color COLOR_BLUE = new Color(68,115,197);
+    private static final Color COLOR_GREEN = new Color(0,175,80);
 
     private final JPanel mainPanel;
     private final CardLayout cardLayout;
     private final java.util.List<Integer> numbers;
     private boolean isAscendingOrder;
     private final Random random;
+
+    private int highlightIndex1 = -1;
+    private int highlightIndex2 = -1;
 
     public Main() {
         setTitle("Single Page Application");
@@ -82,7 +87,7 @@ public class Main extends JFrame {
         JButton enterButton = new JButton("Enter");
         enterButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         enterButton.setMaximumSize(BUTTON_SIZE);
-        enterButton.setBackground(getHSBColorFromDegrees(218, 65, 77));
+        enterButton.setBackground(COLOR_BLUE);
         enterButton.setForeground(Color.WHITE);
         panel.add(enterButton);
 
@@ -105,10 +110,6 @@ public class Main extends JFrame {
         });
 
         return panel;
-    }
-
-    private Color getHSBColorFromDegrees(float hue, float saturation, float brightness) {
-        return Color.getHSBColor(hue / 360f, saturation / 100f, brightness / 100f);
     }
 
     private JPanel createSortScreen(int numberOfNumbers) {
@@ -134,14 +135,14 @@ public class Main extends JFrame {
         // Sort button to toggle sorting order
         JButton sortButton = new JButton("Sort");
         sortButton.setPreferredSize(BUTTON_SIZE);
-        sortButton.setBackground(getHSBColorFromDegrees(147, 100, 69));
+        sortButton.setBackground(COLOR_GREEN);
         sortButton.setForeground(Color.WHITE);
         controlPanel.add(sortButton);
 
         // Reset button to go back to intro screen
         JButton resetButton = new JButton("Reset");
         resetButton.setPreferredSize(BUTTON_SIZE);
-        resetButton.setBackground(getHSBColorFromDegrees(147, 100, 69));
+        resetButton.setBackground(COLOR_GREEN);
         resetButton.setForeground(Color.WHITE);
         controlPanel.add(resetButton);
 
@@ -161,6 +162,9 @@ public class Main extends JFrame {
 
     private void generateRandomNumbers(int count, JPanel buttonPanel) {
         numbers.clear();
+        highlightIndex1 = -1;
+        highlightIndex2 = -1;
+
         for (int i = 0; i < count; i++) {
             numbers.add(random.nextInt(1, 1001)); // Generate numbers between 0 and 1000
         }
@@ -187,7 +191,10 @@ public class Main extends JFrame {
                     gbc.gridy = 0;
                 }
 
-                JButton numberButton = createNumberButton(numbers.get(i), buttonPanel);
+                JButton numberButton = createNumberButton(
+                        numbers.get(i),
+                        buttonPanel,
+                        i == highlightIndex1 || i == highlightIndex2);
                 buttonPanel.add(numberButton, gbc);
                 gbc.gridy++;
             }
@@ -198,12 +205,18 @@ public class Main extends JFrame {
         });
     }
 
-    private JButton createNumberButton(int value, JPanel buttonPanel) {
+    private JButton createNumberButton(int value, JPanel buttonPanel, boolean isHighlighted) {
         JButton numberButton = new JButton(String.valueOf(value));
         numberButton.setPreferredSize(BUTTON_SIZE);
         numberButton.setMinimumSize(BUTTON_SIZE);
-        numberButton.setBackground(getHSBColorFromDegrees(218, 65, 77));
-        numberButton.setForeground(Color.WHITE);
+
+        if (isHighlighted) {
+            numberButton.setBackground(Color.CYAN);
+            numberButton.setForeground(Color.BLACK);
+        } else {
+            numberButton.setBackground(COLOR_BLUE);
+            numberButton.setForeground(Color.WHITE);
+        }
 
         numberButton.addActionListener(e -> handleNumberButtonClick(value, buttonPanel));
         return numberButton;
@@ -225,6 +238,10 @@ public class Main extends JFrame {
                 quickSort(list, low, pi - 1, buttonPanel);
                 quickSort(list, pi + 1, high, buttonPanel);
             }
+
+            highlightIndex1 = -1;
+            highlightIndex2 = -1;
+
             displayNumbers(buttonPanel);
         }).start();
     }
@@ -236,16 +253,32 @@ public class Main extends JFrame {
             if (isAscendingOrder ? list.get(j) <= pivot : list.get(j) >= pivot) {
                 i++;
                 Collections.swap(list, i, j);
+                highlightButtons(i, j, buttonPanel);
                 displayNumbers(buttonPanel);
-                try {
-                    Thread.sleep(100); // delay to simulate sorting progress
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
+                delay(200);
             }
         }
+        highlightButtons(i + 1, high, buttonPanel);
         Collections.swap(list, i + 1, high);
+        displayNumbers(buttonPanel);
+        delay(200);
         return i + 1;
+    }
+
+    private void highlightButtons(int buttonIndex1, int buttonIndex2, JPanel buttonPanel) {
+        SwingUtilities.invokeLater(() -> {
+            highlightIndex1 = buttonIndex1;
+            highlightIndex2 = buttonIndex2;
+            //buttonPanel.repaint();
+        });
+    }
+
+    private void delay(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 
